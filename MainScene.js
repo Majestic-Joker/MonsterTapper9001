@@ -14,6 +14,7 @@ class MainScene extends Phaser.Scene {
         this.stageCounter = 0;
         this.stageText = null;
         this.stageCT = null;
+        this.dpsText = null;
         // Levels in upgrades
         this.levels = {
             sword: 0,
@@ -77,7 +78,11 @@ class MainScene extends Phaser.Scene {
         // Create hp text
         this.hpText = this.add.text(215, 700, "");
         // Create the souls text
-        this.soulsText = this.add.text(50, 100, "Souls: 0", {
+        this.soulsText = this.add.text(25, 100, "Souls: 0", {
+            fontSize: '24px',
+            color: 'black'
+        });
+        this.dpsText = this.add.text(25, 125, "DPS: 0", {
             fontSize: '24px',
             color: 'black'
         });
@@ -212,6 +217,7 @@ class MainScene extends Phaser.Scene {
             this.hpText.setText("0");
         }
         this.soulsText.setText(`Souls: ${this.souls}`);
+        this.dpsText.setText(`DPS: ${(this.levels.thunder*UPGRADE[1].damage)+(this.levels.fire*UPGRADE[2].damage)}`);
         this.stageText.setText(`Stage: ${this.stage}`);
         this.stageCT.setText(`${10-this.stageCounter} to next stage`);
         
