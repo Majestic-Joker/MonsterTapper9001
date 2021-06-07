@@ -7,18 +7,25 @@ class MainScene extends Phaser.Scene {
         this.monsterImage = null;
         this.hp = 5;
         this.aveHP = 5;
+        this.maxHP = null;
         this.hpText = null;
         this.soulsText = null;
         this.stage = 1;
         this.stageCounter = 0;
         this.stageText = null;
+        this.stageCT = null;
         // Levels in upgrades
         this.levels = {
-            thunder: 0
+            sword: 0,
+            thunder: 0,
+            fire: 0
         }
-        this.levelsCost = {
-            thunderCost: 5
-        }
+        this.swordLT = null;
+        this.thunderLT = null;
+        this.fireLT = null;
+        this.swordCT = null;
+        this.thunderCT = null;
+        this.fireCT = null;
         // Status of monster
         this.alive = false;
     }
@@ -34,7 +41,11 @@ class MainScene extends Phaser.Scene {
         for (let i = 0; i < MONSTERS.length; i++) {
             this.load.image(MONSTERS[i].name, `./assets/visual/enemies/${MONSTERS[i].image}`);
         }
-        this.load.image('thunder', './assets/visual/icons/thunder.png');
+        for (let j = 0; j < UPGRADE.length; j++){
+            this.load.image(UPGRADE[j].name, `./assets/visual/icons/${UPGRADE[j].image}`);
+        }
+
+        //this.load.image('thunder', './assets/visual/icons/thunder.png');
         this.load.image('door', './assets/visual/icons/door.png');
         // Load sound effects
         this.load.audio('hit', './assets/audio/sfx/thump.wav');
@@ -74,23 +85,26 @@ class MainScene extends Phaser.Scene {
             fontSize: '36px',
             color: 'black'
         });
+        this.stageCT = this.add.text(180, 70, `${10-this.stageCounter} to next stage`, {
+            fontSize: '12px',
+            color: 'black'
+        });
 
         // Create an upgrade icon for the bolt upgrade
-        let thunder = this.add.image(400, 50, 'thunder');
-        thunder.setScale(1);
-        thunder.setInteractive();
-        thunder.on('pointerdown', () => {
+        let sword = this.add.image(400, 50, 'sword');
+        sword.setScale(1);
+        sword.setInteractive();
+        sword.on('pointerdown', () => {
             // If we have enough money
-            if (this.souls >= this.levelsCost.thunderCost) {
+            if (this.souls >= (this.levels.sword*UPGRADE[0].cost)) {
                 //play sound
                 this.sound.play('select', {
                     volume: .4
                 });
                 // pay the money
-                this.souls -= 5;
+                this.souls -= this.levels.sword * UPGRADE[0].cost;
                 // gain a level
-                this.levels.thunder++;
-                this.levelsCost.thunderCost++;
+                this.levels.sword++;
             }
             else{
                 this.sound.play('fail', {
@@ -98,9 +112,75 @@ class MainScene extends Phaser.Scene {
                 })
             }
         });
-        // Create an interval to use bolt damage
+        this.swordLT = this.add.text(410, 30, `${this.levels.sword}`, {
+            fontSize: '16px',
+            color: 'black'
+        });
+        this.swordCT = this.add.text(370, 70, `Cost:${(this.levels.sword * UPGRADE[0].cost)}`, {
+            fontSize: '16px',
+            color: 'black'
+        })
+        let thunder = this.add.image(400, 120, 'thunder');
+        thunder.setScale(1);
+        thunder.setInteractive();
+        thunder.on('pointerdown', () => {
+            // If we have enough money
+            if (this.souls >= (this.levels.thunder*UPGRADE[1].cost)) {
+                //play sound
+                this.sound.play('select', {
+                    volume: .4
+                });
+                // pay the money
+                this.souls -= this.levels.thunder * UPGRADE[1].cost;
+                // gain a level
+                this.levels.thunder++;
+            }
+            else{
+                this.sound.play('fail', {
+                    volume: .2
+                })
+            }
+        });
+        this.thunderLT = this.add.text(410, 90, `${this.levels.thunder}`, {
+            fontSize: '16px',
+            color: 'black'
+        });
+        this.thunderCT = this.add.text(370, 140, `Cost:${(this.levels.thunder * UPGRADE[1].cost)}`, {
+            fontSize: '16px',
+            color: 'black'
+        })
+        let fire = this.add.image(400, 190, 'fire');
+        fire.setScale(1);
+        fire.setInteractive();
+        fire.on('pointerdown', () => {
+            // If we have enough money
+            if (this.souls >= (this.levels.fire*UPGRADE[2].cost)) {
+                //play sound
+                this.sound.play('select', {
+                    volume: .4
+                });
+                // pay the money
+                this.souls -= this.levels.fire * UPGRADE[2].cost;
+                // gain a level
+                this.levels.fire++;
+            }
+            else{
+                this.sound.play('fail', {
+                    volume: .2
+                })
+            }
+        });
+        this.fireLT = this.add.text(410, 160, `${this.levels.fire}`, {
+            fontSize: '16px',
+            color: 'black'
+        });
+        this.fireCT = this.add.text(370, 210, `Cost:${(this.levels.fire * UPGRADE[2].cost)}`, {
+            fontSize: '16px',
+            color: 'black'
+        })
+        // Create an interval to use upgrade damage
         setInterval(() => {
-            this.damage(this.levels.thunder);
+            this.damage((this.levels.thunder * UPGRADE[1].damage)+(this.levels.fire*UPGRADE[2].damage));
         }, 1000);
 
         // Save button
@@ -133,6 +213,15 @@ class MainScene extends Phaser.Scene {
         }
         this.soulsText.setText(`Souls: ${this.souls}`);
         this.stageText.setText(`Stage: ${this.stage}`);
+        this.stageCT.setText(`${10-this.stageCounter} to next stage`);
+        
+        //set upgrade texts
+        this.swordLT.setText(`${this.levels.sword}`);
+        this.swordCT.setText(`Cost:${(this.levels.sword*UPGRADE[0].cost)}`);
+        this.thunderLT.setText(`${this.levels.thunder}`);
+        this.thunderCT.setText(`Cost:${(this.levels.thunder*UPGRADE[1].cost)}`);
+        this.fireLT.setText(`${this.levels.fire}`);
+        this.fireCT.setText(`Cost:${(this.levels.fire*UPGRADE[2].cost)}`);
     }
 
     damage(amount) {
@@ -146,6 +235,7 @@ class MainScene extends Phaser.Scene {
                 this.stageCounter = 0;
                 this.stage++;
             }
+            this.souls += (1+Math.floor((this.maxHP*.1)*(this.stage*.1)));
             // Set monster to no longer be alive
             this.alive = false;
             // Play a death animation
@@ -166,8 +256,6 @@ class MainScene extends Phaser.Scene {
                         // Choose a random new monster to replace the dead one
                         let index = Math.floor(Math.random() * MONSTERS.length);
                         this.setMonster(MONSTERS[index]);
-                        // Gain a soul
-                        this.souls++;
                         // Save game (and soul gained)
                         this.saveGame();
                     }
@@ -208,7 +296,7 @@ class MainScene extends Phaser.Scene {
             // Convert to seconds
             let s = ms / 1000;
             //gives souls based on stage and average HP of monsters.
-            let soulsGained = (s * this.stage)/(this.aveHP*this.stage);
+            let soulsGained = Math.floor((s * this.stage)/(this.aveHP*this.stage));
             this.souls += soulsGained;
         }
 
@@ -217,7 +305,9 @@ class MainScene extends Phaser.Scene {
         this.levels = JSON.parse(json);
         if (this.levels == null) {
             this.levels = {
-                thunder: 0
+                sword: 0,
+                thunder: 0,
+                fire: 0
             }
         }
     }
@@ -232,6 +322,7 @@ class MainScene extends Phaser.Scene {
         localStorage.setItem('stage', `${this.stage}`);
         // Save levels object as JSON formatted string
         localStorage.setItem('levels', JSON.stringify(this.levels));
+        localStorage.setItem('levelsCost', JSON.stringify(this.levelsCost));
     }
 
     setMonster(monsterConfig) {
@@ -239,12 +330,13 @@ class MainScene extends Phaser.Scene {
         if (this.monsterImage != null) this.monsterImage.destroy();
         // Reset hp of the monster
         this.hp = (monsterConfig.hp * this.stage);
+        this.maxHP = this.hp;
         this.alive = true;
 
         // Create a image of monster at position x:225,y:400
         this.monsterImage = this.add.image(225, 400, monsterConfig.name);
         // Set the size of the monster
-        this.monsterImage.setScale(1);
+        this.monsterImage.setScale(.8);
         // Make the monster clickable
         this.monsterImage.setInteractive();
 
@@ -255,7 +347,7 @@ class MainScene extends Phaser.Scene {
                 this.sound.play('hit', {
                     volume: 0.05
                 });
-                this.damage(1);
+                this.damage(1+this.levels.sword);
             });
     }
 }

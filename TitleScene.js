@@ -36,5 +36,10 @@ class TitleScene extends Phaser.Scene{
             yoyo: true,
             repeat: -1
         });
+
+        let author = this.add.text(300,750, "By: Joshua Beaty", {
+            fontSize: '12px',
+            color: 'black'
+        });
     }
 }
