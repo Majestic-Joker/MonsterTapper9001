@@ -1,17 +1,17 @@
 const MONSTERS = [
     {
-        name: "The Kraken",
-        image: "kraken.png",
-        hp: 15
+        name: "bat",
+        image: "bat.png",
+        hp: 3
     },
     {
-        name: "Beholder",
-        image: "beholder.png",
+        name: "bear",
+        image: "bear.png",
         hp: 10
     },
     {
-        name: "Goblin",
-        image: "goblin.png",
+        name: "beetle",
+        image: "beetle.png",
         hp: 5
     }
 ];
