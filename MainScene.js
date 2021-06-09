@@ -1,5 +1,4 @@
 class MainScene extends Phaser.Scene {
-
     // This is where we define data members
     constructor() {
         super("MainScene");
@@ -59,7 +58,7 @@ class MainScene extends Phaser.Scene {
     // Runs when we first enter this scene
     create() {
         // Load game data
-        this.loadGame();
+        this.loadData();
         //set BG
         let bg = this.add.image(225,400, 'bg1');
         bg.setScale(.3);
@@ -196,17 +195,17 @@ class MainScene extends Phaser.Scene {
             this.sound.play('exit', {
                 volume: .2
             });
-            this.saveGame();
+            this.saveData();
             this.sound.stopByKey('bgm');
             this.scene.start("TitleScene");
         });
 
         // Save every 60s
         setInterval(() => {
-            this.saveGame();
+            this.saveData();
         }, 60000);
         // Save once on startup, to set the time
-        this.saveGame();
+        this.saveData();
     }
 
     // Runs every frame
@@ -263,14 +262,14 @@ class MainScene extends Phaser.Scene {
                         let index = Math.floor(Math.random() * MONSTERS.length);
                         this.setMonster(MONSTERS[index]);
                         // Save game (and soul gained)
-                        this.saveGame();
+                        this.saveData();
                     }
 
             });
         }
     }
 
-    loadGame() {
+    /*loadGame() {
         // Load the soul count from local storage
         let savedSouls = localStorage.getItem('souls');
         let savedStage = localStorage.getItem('stage');
@@ -316,9 +315,25 @@ class MainScene extends Phaser.Scene {
                 fire: 0
             }
         }
+    }*/
+
+    //new load data using the data.js
+    loadData() {
+        const data = loadObjectFromLocal();
+        // Check if data was loaded correctly
+        if (data) {
+            this.souls = data.souls;
+            this.levels = data.levels;
+            this.stage = data.stage;
+            // Determine the time the player has been gone
+            let lastPlayed = data.lastPlayed;
+            this.progress((this.timeNow() - lastPlayed) / 1000);
+        } else {
+            this.resetData();
+        }
     }
 
-    saveGame() {
+    /*saveGame() {
         // Save last time that the user played
         let date = new Date();
         let numDate = date.getTime();
@@ -329,6 +344,43 @@ class MainScene extends Phaser.Scene {
         // Save levels object as JSON formatted string
         localStorage.setItem('levels', JSON.stringify(this.levels));
         localStorage.setItem('levelsCost', JSON.stringify(this.levelsCost));
+    }*/
+
+    saveData() {
+        const data = {
+            souls: this.souls,
+            levels: this.levels,
+            stage: this.stage,
+            lastPlayed: this.timeNow()
+        };
+        saveObjectToLocal(data);
+    }
+
+    //reset data back to 0
+    resetData() {
+        // Start out with no souls
+        this.souls = 0;
+        // Start at stage 0
+        this.stage = 0;
+        // Starting upgrade levels
+        this.levels = {
+            sword: 0,
+            thunder: 0,
+            fire: 0
+        }
+        // Save the reset values
+        this.saveData();
+    }
+
+    //process game progress
+    progress(elapsedTime){
+        let soulsGained = Math.floor((elapsedTime * this.stage)/(this.aveHP*this.stage));
+        this.souls += soulsGained;
+    }
+
+    //get current time
+    timeNow(){
+        return new Date().getTime();
     }
 
     setMonster(monsterConfig) {
